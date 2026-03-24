@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Refiner" />
+  <link rel="apple-touch-icon" href="/icon.png" />
+  <link rel="manifest" href="/manifest.json" />
+  <title>AI Message Refiner</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #1a1a1a; color: #e8e8e8;
+      min-height: 100vh; padding: env(safe-area-inset-top, 16px) 16px env(safe-area-inset-bottom, 16px);
+    }
+    h1 { font-size: 20px; font-weight: 600; padding: 16px 0 20px; text-align: center; color: #e8e8e8; }
+    .section-label {
+      font-size: 11px; color: #777; font-weight: 500;
+      text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px;
+    }
+    .section { margin-bottom: 20px; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    button.chip {
+      padding: 7px 14px; border-radius: 999px; font-size: 13px; cursor: pointer;
+      border: 1.5px solid #383838; background: transparent; color: #777;
+      font-family: inherit; transition: all 0.12s;
+    }
+    button.chip.active {
+      border-color: #6d4fc4; background: #2d2040; color: #a78bfa; font-weight: 500;
+    }
+    button.type-chip {
+      padding: 8px 14px; border-radius: 8px; font-size: 13px; cursor: pointer;
+      border: 1.5px solid #383838; background: transparent; color: #777;
+      font-family: inherit; transition: all 0.12s;
+    }
+    button.type-chip.active {
+      border-color: #6d4fc4; background: #2d2040; color: #a78bfa; font-weight: 500;
+    }
+    textarea {
+      width: 100%; min-height: 150px; resize: vertical;
+      font-size: 15px; padding: 12px; border-radius: 8px;
+      border: 0.5px solid #383838; background: #242424; color: #e8e8e8;
+      font-family: inherit; line-height: 1.6;
+    }
+    textarea:focus { outline: none; border-color: #6d4fc4; }
+    button#refineBtn {
+      margin-top: 12px; padding: 12px 28px; border-radius: 8px;
+      font-size: 15px; font-weight: 500; cursor: pointer;
+      border: 0.5px solid #888; background: #242424; color: #e8e8e8;
+      font-family: inherit; width: 100%; transition: all 0.12s;
+    }
+    button#refineBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .output-box {
+      background: #242424; border-radius: 10px;
+      border: 0.5px solid #383838; padding: 16px;
+      font-size: 15px; line-height: 1.7; color: #e8e8e8;
+      white-space: pre-wrap; margin-top: 8px;
+    }
+    button#copyBtn {
+      margin-top: 10px; padding: 8px 20px; border-radius: 8px;
+      font-size: 13px; cursor: pointer; border: 0.5px solid #383838;
+      background: transparent; color: #777; font-family: inherit; transition: all 0.15s;
+    }
+    button#copyBtn.copied { border-color: #4ade80; background: #0f2a1a; color: #4ade80; }
+    .error { font-size: 13px; color: #f87171; margin-top: 8px; }
+    #output-section { display: none; margin-top: 8px; }
+    hr { border: none; border-top: 0.5px solid #383838; margin: 20px 0; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner {
+      display: inline-block; width: 14px; height: 14px;
+      border: 2px solid #444; border-top-color: #e8e8e8;
+      border-radius: 50%; animation: spin 0.7s linear infinite;
+      vertical-align: middle; margin-right: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>AI Message Refiner</h1>
+
+  <div class="section">
+    <div class="section-label">Message type</div>
+    <div class="chips" id="type-chips">
+      <button class="type-chip" data-value="teams">Teams / Slack</button>
+      <button class="type-chip active" data-value="internal_email">Internal Email</button>
+      <button class="type-chip" data-value="client_email">Client-Facing Email</button>
+      <button class="type-chip" data-value="announcement">Announcement</button>
+      <button class="type-chip" data-value="text">Text Message</button>
+      <button class="type-chip" data-value="other">Other</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Tone</div>
+    <div class="chips" id="tone-chips">
+      <button class="chip" data-value="Formal">Formal</button>
+      <button class="chip active" data-value="Neutral">Neutral</button>
+      <button class="chip" data-value="Casual">Casual</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Refinements</div>
+    <div class="chips" id="action-chips">
+      <button class="chip active" data-value="Fix Grammar & Clarity">Fix Grammar & Clarity</button>
+      <button class="chip" data-value="Adjust Tone">Adjust Tone</button>
+      <button class="chip" data-value="Shorten">Shorten</button>
+      <button class="chip" data-value="Expand">Expand</button>
+      <button class="chip" data-value="Make Persuasive">Make Persuasive</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Your draft</div>
+    <textarea id="input" placeholder="Paste or type your message here..."></textarea>
+  </div>
+
+  <button id="refineBtn" disabled>Refine message</button>
+  <div class="error" id="error"></div>
+
+  <div id="output-section">
+    <hr />
+    <div class="section-label">Refined message</div>
+    <div class="output-box" id="output"></div>
+    <button id="copyBtn">Copy to clipboard</button>
+  </div>
+
+  <script>
+    let msgType = "internal_email";
+    let tone = "Neutral";
+    let actions = ["Fix Grammar & Clarity"];
+
+    function sanitize(str) {
+      return str
+        .replace(/[\u2018\u2019\u0060\u00B4]/g, "'")
+        .replace(/[\u201C\u201D\u00AB\u00BB]/g, '"')
+        .replace(/[\u2013\u2014\u2015]/g, "-")
+        .replace(/\u2026/g, "...")
+        .replace(/\u00A0/g, " ")
+        .replace(/[^\x09\x0A\x0D\x20-\x7E]/g, "")
+        .trim();
+    }
+
+    document.querySelectorAll("#type-chips .type-chip").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll("#type-chips .type-chip").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        msgType = btn.dataset.value;
+      });
+    });
+
+    document.querySelectorAll("#tone-chips .chip").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll("#tone-chips .chip").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        tone = btn.dataset.value;
+      });
+    });
+
+    document.querySelectorAll("#action-chips .chip").forEach(btn => {
+      btn.addEventListener("click", () => {
+        btn.classList.toggle("active");
+        const val = btn.dataset.value;
+        actions = actions.includes(val) ? actions.filter(a => a !== val) : [...actions, val];
+      });
+    });
+
+    const input = document.getElementById("input");
+    const refineBtn = document.getElementById("refineBtn");
+    const errorEl = document.getElementById("error");
+    const outputSection = document.getElementById("output-section");
+    const outputEl = document.getElementById("output");
+    const copyBtn = document.getElementById("copyBtn");
+
+    input.addEventListener("input", () => {
+      refineBtn.disabled = !input.value.trim();
+    });
+
+    refineBtn.addEventListener("click", async () => {
+      errorEl.textContent = "";
+      outputSection.style.display = "none";
+      refineBtn.disabled = true;
+      refineBtn.innerHTML = '<span class="spinner"></span>Refining...';
+
+      try {
+        const cleanInput = sanitize(input.value);
+        const prompt =
+          "You are a professional writing assistant. Refine the following message.\n\n" +
+          "Message type: " + msgType + "\n" +
+          "Desired tone: " + tone + "\n" +
+          "Refinements: " + actions.join(", ") + "\n\n" +
+          "CRITICAL RULES:\n" +
+          "1. NEVER change dates, times, numbers, names, or any specific facts.\n" +
+          "2. Only improve language, structure, tone, and clarity.\n" +
+          "3. Return ONLY the refined message with no explanation or preamble.\n\n" +
+          "Guidelines:\n" +
+          "- text: Very short, informal, no greetings or sign-offs.\n" +
+          "- teams: Concise, conversational, short paragraphs.\n" +
+          "- internal_email: Clear, professional, structured.\n" +
+          "- client_email: Polished, formal, with greeting and sign-off.\n" +
+          "- announcement: Strong opener, then details.\n" +
+          "- other: General best practices.\n\n" +
+          "Original message:\n" + cleanInput;
+
+        const res = await fetch("/api/refine", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt }),
+        });
+
+        if (!res.ok) {
+          const txt = await res.text();
+          throw new Error("HTTP " + res.status + ": " + txt.slice(0, 100));
+        }
+
+        const data = await res.json();
+        outputEl.textContent = data.result || "";
+        outputSection.style.display = "block";
+      } catch (e) {
+        errorEl.textContent = "Error: " + e.message;
+      }
+
+      refineBtn.innerHTML = "Refine message";
+      refineBtn.disabled = !input.value.trim();
+    });
+
+    copyBtn.addEventListener("click", () => {
+      const ta = document.createElement("textarea");
+      ta.value = outputEl.textContent;
+      ta.style.cssText = "position:fixed;top:-9999px;left:-9999px;opacity:0";
+      document.body.appendChild(ta);
+      ta.focus(); ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      copyBtn.textContent = "Copied!";
+      copyBtn.classList.add("copied");
+      setTimeout(() => { copyBtn.textContent = "Copy to clipboard"; copyBtn.classList.remove("copied"); }, 2000);
+    });
+  </script>
+</body>
+</html>

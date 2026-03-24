@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/api/refine", "destination": "/api/refine.js" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
