@@ -17,10 +17,7 @@
       min-height: 100vh; padding: env(safe-area-inset-top, 16px) 16px env(safe-area-inset-bottom, 16px);
     }
     h1 { font-size: 20px; font-weight: 600; padding: 16px 0 20px; text-align: center; color: #e8e8e8; }
-    .section-label {
-      font-size: 11px; color: #777; font-weight: 500;
-      text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px;
-    }
+    .section-label { font-size: 11px; color: #777; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
     .section { margin-bottom: 20px; }
     .chips { display: flex; flex-wrap: wrap; gap: 8px; }
     button.chip {
@@ -28,17 +25,13 @@
       border: 1.5px solid #383838; background: transparent; color: #777;
       font-family: inherit; transition: all 0.12s;
     }
-    button.chip.active {
-      border-color: #6d4fc4; background: #2d2040; color: #a78bfa; font-weight: 500;
-    }
+    button.chip.active { border-color: #6d4fc4; background: #2d2040; color: #a78bfa; font-weight: 500; }
     button.type-chip {
       padding: 8px 14px; border-radius: 8px; font-size: 13px; cursor: pointer;
       border: 1.5px solid #383838; background: transparent; color: #777;
       font-family: inherit; transition: all 0.12s;
     }
-    button.type-chip.active {
-      border-color: #6d4fc4; background: #2d2040; color: #a78bfa; font-weight: 500;
-    }
+    button.type-chip.active { border-color: #6d4fc4; background: #2d2040; color: #a78bfa; font-weight: 500; }
     textarea {
       width: 100%; min-height: 150px; resize: vertical;
       font-size: 15px; padding: 12px; border-radius: 8px;
@@ -54,15 +47,14 @@
     }
     button#refineBtn:disabled { opacity: 0.5; cursor: not-allowed; }
     .output-box {
-      background: #242424; border-radius: 10px;
-      border: 0.5px solid #383838; padding: 16px;
-      font-size: 15px; line-height: 1.7; color: #e8e8e8;
+      background: #242424; border-radius: 10px; border: 0.5px solid #383838;
+      padding: 16px; font-size: 15px; line-height: 1.7; color: #e8e8e8;
       white-space: pre-wrap; margin-top: 8px;
     }
     button#copyBtn {
-      margin-top: 10px; padding: 8px 20px; border-radius: 8px;
-      font-size: 13px; cursor: pointer; border: 0.5px solid #383838;
-      background: transparent; color: #777; font-family: inherit; transition: all 0.15s;
+      margin-top: 10px; padding: 8px 20px; border-radius: 8px; font-size: 13px;
+      cursor: pointer; border: 0.5px solid #383838; background: transparent;
+      color: #777; font-family: inherit; transition: all 0.15s;
     }
     button#copyBtn.copied { border-color: #4ade80; background: #0f2a1a; color: #4ade80; }
     button#resetBtn {
@@ -111,7 +103,7 @@
   <div class="section">
     <div class="section-label">Refinements</div>
     <div class="chips" id="action-chips">
-      <button class="chip active" data-value="Fix Grammar & Clarity">Fix Grammar & Clarity</button>
+      <button class="chip active" data-value="Fix Grammar &amp; Clarity">Fix Grammar &amp; Clarity</button>
       <button class="chip" data-value="Adjust Tone">Adjust Tone</button>
       <button class="chip" data-value="Shorten">Shorten</button>
       <button class="chip" data-value="Expand">Expand</button>
@@ -137,9 +129,9 @@
   </div>
 
   <script>
-    let msgType = "internal_email";
-    let tone = "Neutral";
-    let actions = ["Fix Grammar & Clarity"];
+    var msgType = "internal_email";
+    var tone = "Neutral";
+    var actions = ["Fix Grammar & Clarity"];
 
     function sanitize(str) {
       return str
@@ -152,106 +144,124 @@
         .trim();
     }
 
-    document.querySelectorAll("#type-chips .type-chip").forEach(btn => {
-      btn.addEventListener("click", () => {
-        document.querySelectorAll("#type-chips .type-chip").forEach(b => b.classList.remove("active"));
+    var typeChips = document.querySelectorAll("#type-chips .type-chip");
+    typeChips.forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        typeChips.forEach(function(b) { b.classList.remove("active"); });
         btn.classList.add("active");
-        msgType = btn.dataset.value;
+        msgType = btn.getAttribute("data-value");
       });
     });
 
-    document.querySelectorAll("#tone-chips .chip").forEach(btn => {
-      btn.addEventListener("click", () => {
-        document.querySelectorAll("#tone-chips .chip").forEach(b => b.classList.remove("active"));
+    var toneChips = document.querySelectorAll("#tone-chips .chip");
+    toneChips.forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        toneChips.forEach(function(b) { b.classList.remove("active"); });
         btn.classList.add("active");
-        tone = btn.dataset.value;
+        tone = btn.getAttribute("data-value");
       });
     });
 
-    document.querySelectorAll("#action-chips .chip").forEach(btn => {
-      btn.addEventListener("click", () => {
+    var actionChips = document.querySelectorAll("#action-chips .chip");
+    actionChips.forEach(function(btn) {
+      btn.addEventListener("click", function() {
         btn.classList.toggle("active");
-        const val = btn.dataset.value;
-        actions = actions.includes(val) ? actions.filter(a => a !== val) : [...actions, val];
+        var val = btn.getAttribute("data-value");
+        var idx = actions.indexOf(val);
+        if (idx > -1) {
+          actions.splice(idx, 1);
+        } else {
+          actions.push(val);
+        }
       });
     });
 
-    const input = document.getElementById("input");
-    const refineBtn = document.getElementById("refineBtn");
-    const errorEl = document.getElementById("error");
-    const outputSection = document.getElementById("output-section");
-    const outputEl = document.getElementById("output");
-    const copyBtn = document.getElementById("copyBtn");
+    var input = document.getElementById("input");
+    var refineBtn = document.getElementById("refineBtn");
+    var errorEl = document.getElementById("error");
+    var outputSection = document.getElementById("output-section");
+    var outputEl = document.getElementById("output");
+    var copyBtn = document.getElementById("copyBtn");
+    var resetBtn = document.getElementById("resetBtn");
 
-    input.addEventListener("input", () => {
+    input.addEventListener("input", function() {
       refineBtn.disabled = !input.value.trim();
     });
 
-    refineBtn.addEventListener("click", async () => {
+    refineBtn.addEventListener("click", function() {
       errorEl.textContent = "";
       outputSection.style.display = "none";
       refineBtn.disabled = true;
       refineBtn.innerHTML = '<span class="spinner"></span>Refining...';
 
-      try {
-        const cleanInput = sanitize(input.value);
-        const prompt =
-          "You are a professional writing assistant. Refine the following message.\n\n" +
-          "Message type: " + msgType + "\n" +
-          "Desired tone: " + tone + "\n" +
-          "Refinements: " + actions.join(", ") + "\n\n" +
-          "CRITICAL RULES:\n" +
-          "1. NEVER change dates, times, numbers, names, or any specific facts.\n" +
-          "2. Only improve language, structure, tone, and clarity.\n" +
-          "3. Return ONLY the refined message with no explanation or preamble.\n\n" +
-          "Guidelines:\n" +
-          "- text: Very short, informal, no greetings or sign-offs.\n" +
-          "- teams: Concise, conversational, short paragraphs.\n" +
-          "- internal_email: Clear, professional, structured.\n" +
-          "- client_email: Polished, formal, with greeting and sign-off.\n" +
-          "- announcement: Strong opener, then details.\n" +
-          "- other: General best practices.\n\n" +
-          "Original message:\n" + cleanInput;
+      var cleanInput = sanitize(input.value);
+      var prompt =
+        "You are a professional writing assistant. Refine the following message.\n\n" +
+        "Message type: " + msgType + "\n" +
+        "Desired tone: " + tone + "\n" +
+        "Refinements: " + actions.join(", ") + "\n\n" +
+        "CRITICAL RULES:\n" +
+        "1. NEVER change dates, times, numbers, names, or any specific facts.\n" +
+        "2. Only improve language, structure, tone, and clarity.\n" +
+        "3. Return ONLY the refined message with no explanation or preamble.\n\n" +
+        "Guidelines:\n" +
+        "- text: Very short, informal, no greetings or sign-offs.\n" +
+        "- teams: Concise, conversational, short paragraphs.\n" +
+        "- internal_email: Clear, professional, structured.\n" +
+        "- client_email: Polished, formal, with greeting and sign-off.\n" +
+        "- announcement: Strong opener, then details.\n" +
+        "- other: General best practices.\n\n" +
+        "Original message:\n" + cleanInput;
 
-        const res = await fetch("/api/refine", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ prompt }),
-        });
-
+      fetch("/api/refine", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: prompt })
+      })
+      .then(function(res) {
         if (!res.ok) {
-          const txt = await res.text();
-          throw new Error("HTTP " + res.status + ": " + txt.slice(0, 100));
+          return res.text().then(function(txt) {
+            throw new Error("HTTP " + res.status + ": " + txt.slice(0, 100));
+          });
         }
-
-        const data = await res.json();
+        return res.json();
+      })
+      .then(function(data) {
         outputEl.textContent = data.result || "";
         outputSection.style.display = "block";
-      } catch (e) {
+      })
+      .catch(function(e) {
         errorEl.textContent = "Error: " + e.message;
-      }
-
-      refineBtn.innerHTML = "Refine message";
-      refineBtn.disabled = !input.value.trim();
+      })
+      .finally(function() {
+        refineBtn.innerHTML = "Refine message";
+        refineBtn.disabled = !input.value.trim();
+      });
     });
 
-    document.getElementById("resetBtn").addEventListener("click", () => {
+    resetBtn.addEventListener("click", function() {
       input.value = "";
       outputSection.style.display = "none";
       outputEl.textContent = "";
       errorEl.textContent = "";
       refineBtn.disabled = true;
     });
-      const ta = document.createElement("textarea");
+
+    copyBtn.addEventListener("click", function() {
+      var ta = document.createElement("textarea");
       ta.value = outputEl.textContent;
       ta.style.cssText = "position:fixed;top:-9999px;left:-9999px;opacity:0";
       document.body.appendChild(ta);
-      ta.focus(); ta.select();
+      ta.focus();
+      ta.select();
       document.execCommand("copy");
       document.body.removeChild(ta);
       copyBtn.textContent = "Copied!";
       copyBtn.classList.add("copied");
-      setTimeout(() => { copyBtn.textContent = "Copy to clipboard"; copyBtn.classList.remove("copied"); }, 2000);
+      setTimeout(function() {
+        copyBtn.textContent = "Copy to clipboard";
+        copyBtn.classList.remove("copied");
+      }, 2000);
     });
   </script>
 </body>
