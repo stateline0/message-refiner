@@ -1,8 +1,11 @@
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
 
-  const { prompt } = req.body;
+  const { prompt, secret } = req.body;
   if (!prompt) return res.status(400).json({ error: "Missing prompt" });
+  if (!secret || secret !== process.env.SECRET_KEY) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
 
   try {
     const response = await fetch("https://api.anthropic.com/v1/messages", {
