@@ -15,6 +15,10 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background: #1a1a1a; color: #e8e8e8;
       min-height: 100vh; padding: env(safe-area-inset-top, 16px) 16px env(safe-area-inset-bottom, 16px);
+      display: flex; flex-direction: column; align-items: center;
+    }
+    .container {
+      width: 100%; max-width: 680px;
     }
     h1 { font-size: 20px; font-weight: 600; padding: 16px 0 20px; text-align: center; color: #e8e8e8; }
     .section-label { font-size: 11px; color: #777; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
@@ -77,6 +81,7 @@
   </style>
 </head>
 <body>
+  <div class="container">
   <h1>AI Message Refiner</h1>
 
   <div class="section">
@@ -126,6 +131,8 @@
     <button id="copyBtn">Copy to clipboard</button>
     <button id="resetBtn">Reset</button>
     <div class="bottom-spacer"></div>
+  </div>
+
   </div>
 
   <script>
